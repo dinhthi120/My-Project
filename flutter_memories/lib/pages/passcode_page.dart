@@ -1,11 +1,14 @@
-import 'package:another_flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_memories_dailyjournal/pages/change_page.dart';
+import 'package:flutter_memories_dailyjournal/pages/security_question.dart';
 import '../services/secure_storage.dart';
+import '../widgets/show_flush_bar.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class PasscodePage extends StatefulWidget {
-  static const route = 'passcode-page';
+  final String checked;
 
-  const PasscodePage({super.key});
+  const PasscodePage({super.key, required this.checked});
 
   @override
   State<PasscodePage> createState() => _PasscodePageState();
@@ -14,23 +17,39 @@ class PasscodePage extends StatefulWidget {
 class _PasscodePageState extends State<PasscodePage> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-          decoration: const BoxDecoration(
-            image: DecorationImage(
-              fit: BoxFit.cover,
-              image: AssetImage(
-                'assets/images/passcode-img.png',
+    return WillPopScope(
+      onWillPop: () async {
+        if (widget.checked == 'checkToTurnOff') {
+          Navigator.pushReplacementNamed(context, 'setting-page');
+        }
+        if (widget.checked == 'changePassCode') {
+          Navigator.pushReplacementNamed(context, 'set-lock');
+        }
+
+        return false;
+      },
+      child: Scaffold(
+        body: Container(
+            decoration: const BoxDecoration(
+              image: DecorationImage(
+                fit: BoxFit.cover,
+                image: AssetImage(
+                  'assets/images/passcode-img.png',
+                ),
               ),
             ),
-          ),
-          child: PassCodeScreen()),
+            child: PassCodeScreen(
+              check: widget.checked,
+            )),
+      ),
     );
   }
 }
 
 class PassCodeScreen extends StatefulWidget {
-  const PassCodeScreen({super.key});
+  final dynamic createPasscode;
+  final String check;
+  const PassCodeScreen({super.key, this.createPasscode, required this.check});
 
   @override
   State<PassCodeScreen> createState() => _PassCodeScreenState();
@@ -48,9 +67,9 @@ class _PassCodeScreenState extends State<PassCodeScreen> {
   String oldPin = '';
   String firstPin = '';
   String confirmPin = '';
-
-  // Read Pin nummber from secure storage
   String securePin = '';
+  String checkSecure = '';
+  String checkUserEvent = '';
 
   @override
   void initState() {
@@ -64,6 +83,7 @@ class _PassCodeScreenState extends State<PassCodeScreen> {
 
     setState(() {
       securePin = pin;
+      checkUserEvent = widget.check;
     });
   }
 
@@ -72,7 +92,13 @@ class _PassCodeScreenState extends State<PassCodeScreen> {
     return SafeArea(
       child: Column(
         children: [
-          buildBackButton(),
+          checkUserEvent == 'checkPassOnResume' ||
+                  checkUserEvent == 'checkPassOnCreate'
+              ? const SizedBox(
+                  height: 70,
+                  width: 50,
+                )
+              : buildBackButton(),
           Expanded(
             child: Container(
               alignment: const Alignment(0, 0.1),
@@ -88,7 +114,38 @@ class _PassCodeScreenState extends State<PassCodeScreen> {
             ),
           ),
           buildKeyBoard(),
+          checkUserEvent == 'checkPassOnResume' ||
+                  checkUserEvent == 'checkPassOnCreate'
+              ? buildResetBtn()
+              : const SizedBox(
+                  height: 60,
+                ),
         ],
+      ),
+    );
+  }
+
+  buildResetBtn() {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      child: MaterialButton(
+        onPressed: () {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const SecurityQuestion(
+                passcode: '',
+                checkEvent: 'checkQuestionToLog',
+              ),
+            ),
+          );
+        },
+        child: Text(
+          'reset_passcode'.tr(),
+          style: const TextStyle(
+            color: Colors.white,
+          ),
+        ),
       ),
     );
   }
@@ -100,11 +157,7 @@ class _PassCodeScreenState extends State<PassCodeScreen> {
       padding: const EdgeInsets.all(8),
       child: MaterialButton(
         onPressed: () async {
-          // Delete Pin from secure storage
-          PinSecureStorage.deletePinNumber();
-          await Navigator.pushReplacementNamed(context, 'setting-page');
-          // ignore: use_build_context_synchronously
-          showFlushBar(context, 'Cancel Create Pin');
+          Navigator.pop(context);
         },
         height: 50,
         minWidth: 50,
@@ -120,72 +173,32 @@ class _PassCodeScreenState extends State<PassCodeScreen> {
   }
 
   buildSecurityText() {
-    return securePin == ""
-        ? Column(
-            children: [
-              firstPin == ""
-                  ? Text(
-                      "enter your new pin".toUpperCase(),
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    )
-                  : Text(
-                      "Confirm your pin".toUpperCase(),
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-              // Display Pin from secure storage
-              // Text(
-              //   "your pin is $text".toUpperCase(),
-              //   style: const TextStyle(
-              //     color: Colors.white,
-              //     fontSize: 24,
-              //     fontWeight: FontWeight.bold,
-              //   ),
-              // ),
-            ],
-          )
-        : Column(
-            children: [
-              securePin != oldPin
-                  ? Text(
-                      "Enter your old Pin".toUpperCase(),
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    )
-                  : Column(
-                      children: [
-                        firstPin == ""
-                            ? Text(
-                                "Enter your new Pin".toUpperCase(),
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              )
-                            : Text(
-                                "Confirm your new pin $firstPin $oldPin"
-                                    .toUpperCase(),
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                      ],
-                    ),
-            ],
-          );
+    return checkUserEvent == 'checkPassOnResume' ||
+            checkUserEvent == 'checkToTurnOff' ||
+            checkUserEvent == 'checkPassOnCreate'
+        ? helperText("passcode_check_log".tr())
+        : checkUserEvent == "noPin"
+            ? checkFirstPin()
+            : securePin != oldPin
+                ? helperText("passcode_enter_old_pin".tr())
+                : checkFirstPin();
+  }
+
+  helperText(String text) {
+    return Text(
+      text.toUpperCase(),
+      style: const TextStyle(
+        color: Colors.white,
+        fontSize: 24,
+        fontWeight: FontWeight.bold,
+      ),
+    );
+  }
+
+  checkFirstPin() {
+    return firstPin == ""
+        ? helperText("passcode_enter_new_pin".tr())
+        : helperText("passcode_confirm_pin".tr());
   }
 
   buildPinRow() {
@@ -214,79 +227,28 @@ class _PassCodeScreenState extends State<PassCodeScreen> {
         width: MediaQuery.of(context).size.width * 0.8,
         alignment: Alignment.bottomCenter,
         child: Padding(
-          padding: const EdgeInsets.only(bottom: 32),
+          padding: const EdgeInsets.only(),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  KeyboardNumber(
-                    n: 1,
-                    onPressed: () {
-                      pinIndexSetup("1");
-                    },
-                  ),
-                  KeyboardNumber(
-                    n: 2,
-                    onPressed: () {
-                      pinIndexSetup("2");
-                    },
-                  ),
-                  KeyboardNumber(
-                    n: 3,
-                    onPressed: () {
-                      pinIndexSetup("3");
-                    },
-                  ),
-                ],
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  KeyboardNumber(
-                    n: 4,
-                    onPressed: () {
-                      pinIndexSetup("4");
-                    },
-                  ),
-                  KeyboardNumber(
-                    n: 5,
-                    onPressed: () {
-                      pinIndexSetup("5");
-                    },
-                  ),
-                  KeyboardNumber(
-                    n: 6,
-                    onPressed: () {
-                      pinIndexSetup("6");
-                    },
-                  ),
-                ],
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  KeyboardNumber(
-                    n: 7,
-                    onPressed: () {
-                      pinIndexSetup("7");
-                    },
-                  ),
-                  KeyboardNumber(
-                    n: 8,
-                    onPressed: () {
-                      pinIndexSetup("8");
-                    },
-                  ),
-                  KeyboardNumber(
-                    n: 9,
-                    onPressed: () {
-                      pinIndexSetup("9");
-                    },
-                  ),
-                ],
-              ),
+              ...List.generate(3, (n) {
+                return Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    ...List.generate(
+                      3,
+                      (m) {
+                        return KeyboardNumber(
+                          n: n * 3 + m + 1,
+                          onPressed: () {
+                            pinIndexSetup("${n * 3 + m + 1}");
+                          },
+                        );
+                      },
+                    ),
+                  ],
+                );
+              }),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
@@ -304,31 +266,35 @@ class _PassCodeScreenState extends State<PassCodeScreen> {
                     },
                   ),
                   // Del button
-                  Container(
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: Colors.grey[400],
-                      borderRadius: BorderRadius.circular(60),
-                    ),
-                    width: 60,
-                    child: MaterialButton(
-                      height: 60,
-                      onPressed: () {
-                        clearPin();
-                      },
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(60),
-                      ),
-                      child: Image.asset(
-                        'assets/images/del-icon.png',
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
+                  delButton(),
                 ],
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  delButton() {
+    return Container(
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: Colors.grey[400],
+        borderRadius: BorderRadius.circular(60),
+      ),
+      width: 60,
+      child: MaterialButton(
+        height: 60,
+        onPressed: () {
+          clearPin();
+        },
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(60),
+        ),
+        child: Image.asset(
+          'assets/images/del-icon.png',
+          color: Colors.white,
         ),
       ),
     );
@@ -359,17 +325,26 @@ class _PassCodeScreenState extends State<PassCodeScreen> {
     for (var e in currentPin) {
       strPin += e;
     }
-    if (securePin == "") {
+    createPasscode(strPin);
+    changePassCode(strPin);
+    checkPassOnResume(strPin);
+    checkPassCodeToTurnOff(strPin);
+    checkPassOnCreate(strPin);
+  }
+
+  createPasscode(strPin) {
+    if (checkUserEvent == 'noPin') {
       if (pinIndex == 4 && firstPin == '') {
         setState(() {
           firstPin = strPin;
         });
         showFlushBar(
           context,
-          'Input your Pin again',
+          'flush_bar_input_again'.tr(),
         );
         clearPinField();
       }
+
       if (pinIndex == 4 && firstPin != '') {
         setState(() {
           confirmPin = strPin;
@@ -377,21 +352,27 @@ class _PassCodeScreenState extends State<PassCodeScreen> {
         if (firstPin != confirmPin) {
           showFlushBar(
             context,
-            'Pin does not match',
+            'flush_bar_not_match'.tr(),
           );
-
           clearPinField();
-        }
-        if (firstPin == confirmPin) {
-          // Set Pin Number to secure storage
-          await PinSecureStorage.setPinNumber(confirmPin);
-          // ignore: use_build_context_synchronously
-          Navigator.pushReplacementNamed(context, 'question-page');
+        } else {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => SecurityQuestion(
+                passcode: confirmPin,
+                checkEvent: 'setQuestion',
+              ),
+            ),
+          );
         }
       }
     }
-    if (securePin != "") {
-      if (pinIndex == 4 && oldPin == "") {
+  }
+
+  changePassCode(strPin) async {
+    if (checkUserEvent == 'changePassCode') {
+      if (pinIndex == 4 && checkSecure == "") {
         setState(() {
           oldPin = strPin;
         });
@@ -399,22 +380,22 @@ class _PassCodeScreenState extends State<PassCodeScreen> {
           // ignore: use_build_context_synchronously
           showFlushBar(
             context,
-            'Old Pin does not match',
+            'flush_bar_not_match'.tr(),
           );
           clearPinField();
         } else {
-          setState(() {
-            oldPin = strPin;
-          });
           // ignore: use_build_context_synchronously
           showFlushBar(
             context,
-            'Enter your new pin',
+            'flush_bar_enter_new_pin'.tr(),
           );
           clearPinField();
+          setState(() {
+            checkSecure = securePin;
+          });
         }
-      }
-      if (pinIndex == 4 && oldPin != "") {
+      } else {
+        // Input first passcode
         if (pinIndex == 4 && firstPin == "") {
           setState(() {
             firstPin = strPin;
@@ -422,22 +403,28 @@ class _PassCodeScreenState extends State<PassCodeScreen> {
           // ignore: use_build_context_synchronously
           showFlushBar(
             context,
-            'Enter your Pin again',
+            'flush_bar_input_again'.tr(),
           );
           clearPinField();
         }
+
+        // After input first passcode
         if (pinIndex == 4 && firstPin != '') {
           setState(() {
             confirmPin = strPin;
           });
+
+          // Compare first input passcode with confirm passcode
+          // If wrong input confirm passcode again
           if (firstPin != confirmPin) {
             // ignore: use_build_context_synchronously
             showFlushBar(
               context,
-              'Pin does not match',
+              'flush_bar_not_match'.tr(),
             );
             clearPinField();
           }
+
           if (firstPin == confirmPin) {
             // Set Pin Number to secure storage
             await PinSecureStorage.setPinNumber(confirmPin);
@@ -446,9 +433,76 @@ class _PassCodeScreenState extends State<PassCodeScreen> {
             // ignore: use_build_context_synchronously
             showFlushBar(
               context,
-              'Change Pin successfully',
+              'flush_bar_change_success'.tr(),
             );
           }
+        }
+      }
+    }
+  }
+
+  checkPassOnResume(strPin) async {
+    if (checkUserEvent == 'checkPassOnResume') {
+      if (pinIndex == 4) {
+        setState(() {
+          firstPin = strPin;
+        });
+        if (firstPin != securePin) {
+          showFlushBar(
+            context,
+            'flush_bar_wrong_pin'.tr(),
+          );
+          clearPinField();
+        } else {
+          await CheckUserSession.setUserSession('logged');
+          // ignore: use_build_context_synchronously
+          Navigator.pop(context);
+        }
+      }
+    }
+  }
+
+  checkPassOnCreate(strPin) async {
+    if (checkUserEvent == 'checkPassOnCreate') {
+      if (pinIndex == 4) {
+        setState(() {
+          firstPin = strPin;
+        });
+        if (firstPin != securePin) {
+          showFlushBar(
+            context,
+            'flush_bar_wrong_pin'.tr(),
+          );
+          clearPinField();
+        } else {
+          await CheckUserSession.setUserSession('logged');
+          // ignore: use_build_context_synchronously
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const ChangePage(),
+            ),
+          );
+        }
+      }
+    }
+  }
+
+  checkPassCodeToTurnOff(strPin) async {
+    if (checkUserEvent == 'checkToTurnOff') {
+      if (pinIndex == 4) {
+        setState(() {
+          firstPin = strPin;
+        });
+        if (firstPin != securePin) {
+          showFlushBar(
+            context,
+            'flush_bar_wrong_pin'.tr(),
+          );
+          clearPinField();
+        } else {
+          // ignore: use_build_context_synchronously
+          Navigator.pushReplacementNamed(context, 'set-lock');
         }
       }
     }
@@ -568,35 +622,4 @@ class KeyboardNumber extends StatelessWidget {
       ),
     );
   }
-}
-
-void showFlushBar(context, message) {
-  Flushbar(
-    borderRadius: BorderRadius.circular(20),
-    margin: const EdgeInsets.only(top: 18, left: 54, right: 54),
-    padding: EdgeInsets.zero,
-    flushbarStyle: FlushbarStyle.FLOATING,
-    flushbarPosition: FlushbarPosition.TOP,
-    animationDuration: const Duration(milliseconds: 1000),
-    duration: const Duration(seconds: 1),
-    messageText: Container(
-      alignment: Alignment.center,
-      height: 60,
-      width: MediaQuery.of(context).size.width * 0.8,
-      decoration: const BoxDecoration(
-        color: Colors.blue,
-        borderRadius: BorderRadius.all(
-          Radius.circular(20),
-        ),
-      ),
-      child: Text(
-        message,
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 18,
-          fontWeight: FontWeight.w500,
-        ),
-      ),
-    ),
-  ).show(context);
 }

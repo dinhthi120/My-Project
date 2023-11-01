@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_memories_dailyjournal/pages/passcode_page.dart';
+import 'package:flutter_memories_dailyjournal/pages/security_question.dart';
 import '../services/secure_storage.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class SetDiaryLock extends StatefulWidget {
   static const route = 'set-lock';
@@ -9,8 +12,8 @@ class SetDiaryLock extends StatefulWidget {
   State<SetDiaryLock> createState() => _SetDiaryLockState();
 }
 
-bool active = false;
 String pin = "";
+bool active = false;
 
 class _SetDiaryLockState extends State<SetDiaryLock> {
   @override
@@ -21,18 +24,14 @@ class _SetDiaryLockState extends State<SetDiaryLock> {
   }
 
   Future init() async {
-    String getPin = await PinSecureStorage.getPinNumber() ?? '';
+    String getPin = await PinSecureStorage.getPinNumber() ?? "";
     setState(() {
       pin = getPin;
     });
-    if (getPin == "") {
-      setState(() {
-        active == false;
-      });
+    if (pin != "") {
+      active = true;
     } else {
-      setState(() {
-        active == true;
-      });
+      active = false;
     }
   }
 
@@ -40,71 +39,83 @@ class _SetDiaryLockState extends State<SetDiaryLock> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        elevation: 3,
-        backgroundColor: const Color(0xFFE5F5FF),
-        title: const Text('Set Diary Lock'),
-        titleTextStyle: const TextStyle(
-          color: Colors.black,
-          fontSize: 18,
-          fontWeight: FontWeight.w500,
-        ),
+        elevation: 1,
+        title: Text('set_lock_title'.tr()),
         centerTitle: false,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          color: Colors.black,
           onPressed: () {
             Navigator.pop(context);
           },
         ),
       ),
-      backgroundColor: const Color(0xFFE5F5FF),
       body: Column(
         children: [
           SetLockTile(
-            onChanged: (bool value) {
+            onChanged: (bool value) async {
               setState(
                 () {
                   active = value;
                 },
               );
-              // if (mounted) {
-              //   PinSecureStorage.deletePinNumber();
-              // } else {
-              //   Navigator.pushReplacementNamed(context, 'passcode-page');
-              // }
+              if (active == true) {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const PasscodePage(checked: 'noPin'),
+                  ),
+                );
+              } else {
+                await PinSecureStorage.deletePinNumber();
+                await QuestionSecureStorage.deleteSecurityQuestion();
+                await AnswerSecureStorage.deleteSecurityAnswer();
+                await CheckUserSession.deleteUserSession();
+              }
             },
           ),
-          active == true
-              ? Column(
-                  children: [
-                    SetLockItems(
-                      trailingSwitch: false,
-                      title: 'Set Passcode $pin',
-                      subTitle: 'Set or change your passcode',
-                      onTap: () {
-                        Navigator.pushReplacementNamed(
-                          context,
-                          'passcode-page',
-                        );
-                      },
-                    ),
-                    SetLockItems(
-                      trailingSwitch: false,
-                      title: 'Set Security Question',
-                      onTap: () {
-                        Navigator.pushReplacementNamed(
-                          context,
-                          'question-page',
-                        );
-                      },
-                      subTitle:
-                          'It will be used in case you forget your passcode',
-                    ),
-                  ],
-                )
-              : const SizedBox(),
+          active == true ? const ShowHiddenWidget() : const SizedBox(),
         ],
       ),
+    );
+  }
+}
+
+class ShowHiddenWidget extends StatelessWidget {
+  const ShowHiddenWidget({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        SetLockItems(
+          title: 'set_lock_set_passcode_title'.tr(),
+          subTitle: 'set_lock_set_passcode_sub_title'.tr(),
+          onTap: () {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) =>
+                    const PasscodePage(checked: 'changePassCode'),
+              ),
+            );
+          },
+        ),
+        SetLockItems(
+          title: 'set_lock_set_question_title'.tr(),
+          onTap: () {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const SecurityQuestion(
+                  passcode: '',
+                  checkEvent: 'changeQuestion',
+                ),
+              ),
+            );
+          },
+          subTitle: 'set_lock_set_question_sub_title'.tr(),
+        ),
+      ],
     );
   }
 }
@@ -112,11 +123,10 @@ class _SetDiaryLockState extends State<SetDiaryLock> {
 class SetLockItems extends StatefulWidget {
   final String title;
   final String subTitle;
-  final bool trailingSwitch;
   final Function() onTap;
+
   const SetLockItems({
     super.key,
-    required this.trailingSwitch,
     required this.title,
     required this.subTitle,
     required this.onTap,
@@ -129,13 +139,15 @@ class SetLockItems extends StatefulWidget {
 class _SetLockItemsState extends State<SetLockItems> {
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: widget.onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8),
-        child: ListTile(
-          title: Text(widget.title),
-          subtitle: Text(widget.subTitle),
+    return Container(
+      width: MediaQuery.of(context).size.width,
+      margin: const EdgeInsets.only(left: 24, right: 24, top: 16),
+      child: ListTile(
+        onTap: widget.onTap,
+        title: Text(widget.title),
+        subtitle: Text(
+          widget.subTitle,
+          style: const TextStyle(fontSize: 13, color: Colors.grey),
         ),
       ),
     );
@@ -153,11 +165,20 @@ class SetLockTile extends StatefulWidget {
 class _SetLockTileState extends State<SetLockTile> {
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8),
+    return Container(
+      width: MediaQuery.of(context).size.width,
+      margin: const EdgeInsets.only(left: 24, right: 24, top: 16),
       child: ListTile(
-        title: const Text('Enable Diary Lock'),
-        subtitle: const Text('Enable passcode to protect your diary'),
+        title: Text(
+          'set_lock_enable_diary_lock_title'.tr(),
+        ),
+        subtitle: Text(
+          'set_lock_enable_diary_lock_sub_title'.tr(),
+          style: const TextStyle(
+            fontSize: 13,
+            color: Colors.grey,
+          ),
+        ),
         trailing: Switch(
           value: active,
           onChanged: widget.onChanged,

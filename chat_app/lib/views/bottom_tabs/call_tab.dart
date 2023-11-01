@@ -1,6 +1,6 @@
 import 'package:chat_app/views/components/extension.dart';
+import 'package:chat_app/views/components/widgets.dart';
 import 'package:flutter/material.dart';
-import '../components/widgets.dart';
 
 class CallTab extends StatefulWidget {
   const CallTab({Key? key}) : super(key: key);
@@ -71,7 +71,7 @@ class _CallTabState extends State<CallTab> {
               ),
 
               // Search field
-              SearchBar(context),
+              searchBar(context),
 
               // List call
               Expanded(

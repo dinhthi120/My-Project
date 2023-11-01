@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 
-Widget SearchBar(context) {
+Widget searchBar(context) {
   return Container(
-    padding:
-    const EdgeInsets.only(left: 12, right: 12),
+    padding: const EdgeInsets.only(left: 12, right: 12),
     height: 54,
     width: MediaQuery.of(context).size.width,
     child: TextField(
@@ -13,25 +12,25 @@ Widget SearchBar(context) {
       textAlignVertical: TextAlignVertical.center,
       autofocus: false,
       decoration: InputDecoration(
-        filled: true,
-        fillColor: Colors.grey[200],
-        prefixIcon: const Icon(Icons.search, color: Colors.grey,),
-        contentPadding: const EdgeInsets.only(top: 20),
-        focusedBorder: const OutlineInputBorder(
-          borderSide:
-          BorderSide(width: 2, color: Colors.white),
-          borderRadius: BorderRadius.all(Radius.circular(40)),
-        ),
-        enabledBorder: const OutlineInputBorder(
-          borderSide:
-          BorderSide(width: 2, color: Colors.white),
-          borderRadius: BorderRadius.all(Radius.circular(40)),
-        ),
-        hintText: 'Tìm kiếm',
-        hintStyle: const TextStyle(
-          color: Colors.grey,
-        )
-      ),
+          filled: true,
+          fillColor: Colors.grey[200],
+          prefixIcon: const Icon(
+            Icons.search,
+            color: Colors.grey,
+          ),
+          contentPadding: const EdgeInsets.only(top: 20),
+          focusedBorder: const OutlineInputBorder(
+            borderSide: BorderSide(width: 2, color: Colors.white),
+            borderRadius: BorderRadius.all(Radius.circular(40)),
+          ),
+          enabledBorder: const OutlineInputBorder(
+            borderSide: BorderSide(width: 2, color: Colors.white),
+            borderRadius: BorderRadius.all(Radius.circular(40)),
+          ),
+          hintText: 'Tìm kiếm',
+          hintStyle: const TextStyle(
+            color: Colors.grey,
+          )),
     ),
   );
 }
@@ -54,8 +53,8 @@ Widget AvatarAndTitle(avatar, title) {
         ),
         child: Text(
           title,
-          style:
-          const TextStyle(fontSize: 18, fontWeight: FontWeight.w500, color: Colors.white),
+          style: const TextStyle(
+              fontSize: 18, fontWeight: FontWeight.w500, color: Colors.white),
         ),
       ),
     ],

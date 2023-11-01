@@ -81,7 +81,7 @@ class _ChatTabState extends State<ChatTab> {
               ),
 
               // Search field
-              SearchBar(context),
+              searchBar(context),
 
               // List box chat
               Expanded(

@@ -2,7 +2,6 @@ import 'package:chat_app/controllers/conversation_controller.dart';
 import 'package:chat_app/views/components/extension.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import '../bottom_nav_bar.dart';
 
 class BoxChat extends StatefulWidget {
   final String conversationId;

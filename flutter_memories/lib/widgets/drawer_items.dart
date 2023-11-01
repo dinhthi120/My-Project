@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 
 class DrawerItems extends StatelessWidget {
   const DrawerItems({
-    Key? key,
+    super.key,
     required this.icon,
     required this.title,
     required this.onTap,
-  }) : super(key: key);
+  });
 
   final IconData icon;
   final String title;
@@ -15,9 +15,11 @@ class DrawerItems extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(0),
+      ),
       leading: Icon(
         icon,
-        color: Colors.blue,
       ),
       title: Text(
         title,

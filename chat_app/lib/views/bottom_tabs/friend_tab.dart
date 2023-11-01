@@ -46,7 +46,8 @@ class _PhoneBookState extends State<PhoneBook> {
                 Container(
                   width: MediaQuery.of(context).size.width,
                   height: 60,
-                  margin: const EdgeInsets.only(left: 12, right: 12, top: 12, bottom: 12),
+                  margin: const EdgeInsets.only(
+                      left: 12, right: 12, top: 12, bottom: 12),
                   decoration: BoxDecoration(
                     color: Colors.greenAccent[400],
                     borderRadius: BorderRadius.circular(40),
@@ -93,7 +94,7 @@ class _PhoneBookState extends State<PhoneBook> {
                 ),
 
                 // Search field
-                SearchBar(context),
+                searchBar(context),
 
                 // Body Tab bar
                 Expanded(
@@ -145,7 +146,11 @@ class _PhoneBookState extends State<PhoneBook> {
                                                     index -
                                                     1;
                                                 return Container(
-                                                  padding: const EdgeInsets.only(top: 6, bottom: 6, left: 24),
+                                                  padding:
+                                                      const EdgeInsets.only(
+                                                          top: 6,
+                                                          bottom: 6,
+                                                          left: 24),
                                                   child: Row(
                                                     children: [
                                                       const SizedBox(
@@ -162,7 +167,12 @@ class _PhoneBookState extends State<PhoneBook> {
                                                         width: 16,
                                                       ),
                                                       Text(
-                                                        capitalizeAllWord(getName(snapshot.data['friend_list'][reverseIndex])),
+                                                        capitalizeAllWord(
+                                                            getName(snapshot
+                                                                        .data[
+                                                                    'friend_list']
+                                                                [
+                                                                reverseIndex])),
                                                         style: const TextStyle(
                                                             fontSize: 16),
                                                       )
@@ -196,7 +206,7 @@ class _PhoneBookState extends State<PhoneBook> {
                                         if (snapshot.data['friend_list'] !=
                                             null) {
                                           if (snapshot
-                                              .data['friend_list'].length !=
+                                                  .data['friend_list'].length !=
                                               0) {
                                             return ListView.builder(
                                               padding: const EdgeInsets.only(
@@ -206,12 +216,16 @@ class _PhoneBookState extends State<PhoneBook> {
                                                   .data['friend_list'].length,
                                               itemBuilder: (context, index) {
                                                 int reverseIndex = snapshot
-                                                    .data['friend_list']
-                                                    .length -
+                                                        .data['friend_list']
+                                                        .length -
                                                     index -
                                                     1;
                                                 return Container(
-                                                  padding: const EdgeInsets.only(top: 6, bottom: 6, left: 24),
+                                                  padding:
+                                                      const EdgeInsets.only(
+                                                          top: 6,
+                                                          bottom: 6,
+                                                          left: 24),
                                                   child: Row(
                                                     children: [
                                                       const SizedBox(
@@ -219,8 +233,8 @@ class _PhoneBookState extends State<PhoneBook> {
                                                         height: 45,
                                                         child: CircleAvatar(
                                                           backgroundImage:
-                                                          AssetImage(
-                                                              'assets/avatar.jpg'),
+                                                              AssetImage(
+                                                                  'assets/avatar.jpg'),
                                                           minRadius: 16,
                                                         ),
                                                       ),
@@ -228,7 +242,12 @@ class _PhoneBookState extends State<PhoneBook> {
                                                         width: 16,
                                                       ),
                                                       Text(
-                                                        capitalizeAllWord(getName(snapshot.data['friend_list'][reverseIndex])),
+                                                        capitalizeAllWord(
+                                                            getName(snapshot
+                                                                        .data[
+                                                                    'friend_list']
+                                                                [
+                                                                reverseIndex])),
                                                         style: const TextStyle(
                                                             fontSize: 16),
                                                       )

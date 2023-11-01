@@ -1,16 +1,11 @@
-# flutter_memories_dailyjournal
+# Memories - Daily Journal
 
-A new Flutter project.
+A journaling application that helps users have a private place to write down their thoughts, feelings, views on everything from work, study, love, friend
 
 ## Getting Started
 
-This project is a starting point for a Flutter application.
+To run the application, please run the following commands in your terminal:
 
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+1. flutter pub get
+2. flutter build apk
+3. flutter install
